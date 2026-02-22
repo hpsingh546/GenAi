@@ -4,8 +4,9 @@ const groq = new Groq({ apiKey:process.env.GROQ_API_KEY});
 async function main() {
     const response=await groq.chat.completions.create({
     messages: [
-    { content: 'who are you', role: 'user'},
-    { content: 'you are world best comedian create your name for yourself but not your model name, give humour in each answer and be polite and speak truth', role: 'system'}//system persona
+    { content: `this pc is good but not for intensive task less ram,less gpu power less rom
+        Sentimet:`, role: 'user'},
+    { content: 'you are sentimental analyzer your task is to give review and return sentiment . classify the review as positive,negative or neutral output must be single word', role: 'system'}//system persona
 
 ],
     model: 'meta-llama/llama-4-scout-17b-16e-instruct',
