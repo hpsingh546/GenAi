@@ -5,14 +5,14 @@ async function main() {
   const response = await groq.chat.completions.create({
     temperature: 1,
     //top_p:0.1,
-    stop: "ga", //Negative
-    max_completion_tokens,
+    //stop: "ga", //Negative
+    // max_completion_tokens,
     frequency_penalty: 1,
     // presence_penalty:
     messages: [
       {
-        content:
-          "you are sentimental analyzer your task is to give review and return sentiment . classify the review as positive,negative or neutral output must be single word",
+        content: `you are sentimental analyzer your task is to give review and return sentiment . classify the review as positive,negative or neutral output must single word and in  JSON structure
+          example:{"sentiment":"Negative"}`,
         role: "system",
       }, //system persona
       {
@@ -21,9 +21,11 @@ async function main() {
         role: "user",
       },
     ],
+    response_format: { type: "json_object" },
+
     model: "meta-llama/llama-4-scout-17b-16e-instruct",
   });
-  console.log(response.choices[0].message.content);
+  console.log(JSON.parse(response.choices[0].message.content));
   console.log("By By");
 }
 main();
