@@ -10,14 +10,9 @@ const messages = [
   {
     content: `You are a smart personal assistant who ans the question. 
       When you need information you don't have, use the 'Websearch({query})'//search the latest information and real time data on internet,
-
      `,
     role: "system",
-  }, //system persona
-  // {
-  //   content: `donald trump on iran attack`,
-  //   role: "user",
-  // },
+  },
 ];
 async function main() {
   const rl = realine.createInterface({
@@ -88,39 +83,6 @@ async function main() {
     } //this loop is for llm  tool calling
   }
   rl.close();
-  // const response2 = await groq.chat.completions.create({
-  //   model: "llama-3.3-70b-versatile", //some models have capability for browser search as welll like open ai
-  //   temperature: 0,
-
-  //   messages: messages,
-
-  //   // tools: [
-  //   //   {
-  //   //     type: "function",
-  //   //     function: {
-  //   //       name: "Websearch",
-  //   //       description:
-  //   //         "search the latest information and real time data on internet",
-  //   //       parameters: {
-  //   //         // JSON Schema object
-  //   //         type: "object",
-  //   //         properties: {
-  //   //           query: {
-  //   //             type: "string",
-  //   //             description: "The search query to perform search on",
-  //   //           },
-  //   //         },
-  //   //         required: ["query"], //we need to mention which param is required to call this function
-  //   //       },
-  //   //     },
-  //   //   },
-  //   // ],
-  //   // tool_choice: "auto", //llm take decision
-  // });
-  // console.log(
-  //   "Final Assistant Response:",
-  //   response2.choices[0].message.content,
-  // );
 }
 async function Websearch({ query }) {
   console.log(query);
