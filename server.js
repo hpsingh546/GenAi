@@ -1,48 +1,67 @@
 import Groq from "groq-sdk";
-import { z } from "zod";
-
 import "dotenv/config";
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-// 1. Define your expected structure with Zod
-const SentimentSchema = z.object({
-  sentiment: z.enum(["Positive", "Negative", "Neutral"]),
-  confidence: z.number().min(0).max(10),
-});
-async function main(reviewText) {
-  try {
-    const response = await groq.chat.completions.create({
-      messages: [
-        {
-          content: `you are sentimental analyzer your task is to give review and return sentiment . classify the review as positive,negative or neutral output must single object and in  JSON structure
-          example:{"sentiment":"Negative","confidence":"6"}`,
-          role: "system",
-        }, //system persona
-        {
-          content: reviewText,
-          role: "user",
+async function main() {
+  const response = await groq.chat.completions.create({
+    model: "openai/gpt-oss-20b", //some models have capability for browser search as welll like open ai
+    temperature: 0,
+
+    messages: [
+      {
+        content: `You are a smart personal assistant who ans the question. 
+      When you need information you don't have, use the 'Websearch' tool. 
+     `,
+        role: "system",
+      }, //system persona
+      {
+        content: `when iphone 17 is launched`,
+        role: "user",
+      },
+    ],
+
+    tools: [
+      {
+        type: "function",
+        function: {
+          name: "Websearch",
+          description:
+            "search the latest information and real time data on internet",
+          parameters: {
+            // JSON Schema object
+            type: "object",
+            properties: {
+              query: {
+                type: "string",
+                description: "The search query to perform search on",
+              },
+            },
+            required: ["query"], //we need to mention which param is required to call this function
+          },
         },
-      ],
-      response_format: { type: "json_object" },
-
-      model: "meta-llama/llama-4-scout-17b-16e-instruct",
-    });
-
-    const rawJson = response.choices[0].message.content;
-    if (!rawJson) throw new Error("Empty response");
-
-    // 2. Parse the JSON string
-    const parsed = JSON.parse(rawJson);
-    console.log(parsed);
-    // 3. Validate against Zod schema
-    const validated = SentimentSchema.parse(parsed);
-
-    console.log("✅ Validated data:", validated);
-    return validated;
-  } catch (error) {
-    console.error("❌ Validation failed:", error.message);
-    // Here you could implement retry logic or fallback
-    return null;
+      },
+    ],
+    tool_choice: "auto", //llm take decision
+  });
+  const toolCalls = response.choices[0].message.tool_calls;
+  if (!toolCalls) //means llm not make toke tools it get ans
+  {
+    console.log(`Assistatant`, response.choices[0].message);
+    return;
+  }
+  for (const tool of toolCalls) {
+    const functionName = tool.function.name;
+    const argumentsName = tool.function.arguments; //its in json string
+    console.log(functionName);
+    console.log(JSON.parse(argumentsName));
+    if (functionName === "Websearch") {
+      const ToolResult = await Websearch(JSON.parse(argumentsName));
+      console.log(ToolResult);
+    }
   }
 }
-const text = `this pc is good`;
-main(text);
+async function Websearch({ query }) {
+  console.log(query);
+  console.log("calling websearch");
+  return "query";
+}
+main();

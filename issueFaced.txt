@@ -1,0 +1,68 @@
+chapter 3 part 7 
+
+import Groq from "groq-sdk";import "dotenv/config";const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });async function main() { const response = await groq.chat.completions.create({ model: "llama-3.3-70b-versatile", temperature: 0, messages: [ { content: `you are smart personal assistant who answer the asked questions. `, role: "system", }, //system persona { content: `what is today`, role: "user", }, ], tools: [ { type: "function", function: { name: "Websearch", description: "search the latest information and real time data on internet", parameters: { // JSON Schema object type: "object", properties: { query: { type: "string", description: "The search query to perform search on", }, }, required: ["query"], //we need to mention which param is required to call this function }, }, }, ], }); console.log(response); console.log("By By");}async function Websearch({ query }) { console.log("calling websearch"); return "query";}main();WHY IN THIS CODE IT IS NOT CALLING WEB SEARCH FUNCTION AND PRINT CONSOLE
+The BadRequestError: 400 with the code tool_use_failed occurs because the llama-3.3-70b-versatile model is currently hallucinating a custom XML-like format (<function=Websearch ...>) instead of returning the standard JSON tool-call object the Groq API expects. 
+Groq Community
+Groq Community
+ +1
+This is a known behavior where the model attempts to "reason" through the function call manually. To fix this, you must explicitly instruct the model to use the proper tool-calling format in your system prompt.
+How to Fix the Error
+Update your messages array to include a more strict system instruction and ensure your function arguments are parsed correctly.
+Strengthen the System Prompt: Tell the model to only use provided tools and follow the schema strictly.
+Use the Tool-Use Specific Model: While llama-3.3-70b-versatile supports tools, Groq recommends using their specialized tool-use models like llama3-groq-70b-8192-tool-use-preview for higher reliability. 
+GroqCloud
+GroqCloud
+ +3
+Corrected Code Snippet
+javascript
+const response = await groq.chat.completions.create({
+  model: "llama-3.3-70b-versatile", // Or "llama3-groq-70b-8192-tool-use-preview"
+  temperature: 0,
+  messages: [
+    {
+      role: "system",
+      content: `You are a smart personal assistant. 
+      When you need information you don't have, use the 'Websearch' tool. 
+      Output ONLY the function call in the required format. Do not add explanations before calling tools.`
+    },
+    {
+      role: "user",
+      content: "weather of delhi",
+    },
+  ],
+  tools: [
+    {
+      type: "function",
+      function: {
+        name: "Websearch",
+        description: "search the latest information and real time data on internet",
+        parameters: {
+          type: "object",
+          properties: {
+            query: { type: "string", description: "The search query" },
+          },
+          required: ["query"],
+        },
+      },
+    },
+  ],
+  tool_choice: "auto",
+});
+
+const message = response.choices[0].message;
+
+// Check if tool_calls exists and has at least one entry
+if (message.tool_calls && message.tool_calls.length > 0) {
+    const toolCall = message.tool_calls[0];
+    const queryArg = JSON.parse(toolCall.function.arguments).query;
+    // ... proceed with your Websearch call
+}
+Use code with caution.
+
+Why this happened
+Malformed Syntax: The error message failed_generation: "<function=Websearch ..." shows the model tried to write its own tag. The API rejects this because it expects a specific JSON structure in the tool_calls field, not raw text containing tags.
+Prompt Sensitivity: Llama 3 models sometimes need a "nudge" to stop talking and just execute the function. Adding "Do not add explanations before calling tools" to the system prompt usually stops this. 
+GroqCloud
+GroqCloud
+ +3
+Would you like to see how to implement error handling to catch these malformed generations and automatic
