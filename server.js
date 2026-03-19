@@ -28,7 +28,9 @@ async function main() {
       content: question,
     });
     while (true) {
+      console.log(messages);
       const response = await groq.chat.completions.create({
+        //Creates a model response for the given chat conversation.z
         model: "openai/gpt-oss-120b", //some models have capability for browser search as welll like open ai
         temperature: 0,
 
