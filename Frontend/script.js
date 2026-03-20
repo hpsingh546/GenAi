@@ -20,15 +20,34 @@ Hi how are you?
   msg.textContent = text;
   chatContainer?.appendChild(msg);
   input.value = "";
+  //call server
+  const assistantMsg = await callServer(text);
+  const assistantMsgEle = document.createElement("div");
+  assistantMsgEle.className = `max-w-fit`;
+  assistantMsgEle.textContent = assistantMsg;
+  chatContainer?.appendChild(assistantMsgEle);
 }
-
-function handleAsk(e) {
+async function callServer(message) {
+  console.log(message);
+  const response = await fetch("http://localhost:3001/chat", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({ message: message }),
+  });
+  if (!response.ok) throw new Error("error generating response");
+  const result = await response.json();
+  console.log(result);
+  return result.message;
+}
+async function handleAsk(e) {
   const text = input?.value.trim();
   if (!text) {
     return;
   }
 
-  generate(text);
+  await generate(text);
 }
 
 function handelEnter(e) {
