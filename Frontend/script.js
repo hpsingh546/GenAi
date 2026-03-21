@@ -1,6 +1,8 @@
 const input = document.getElementById("input");
 const askBtn = document.getElementById("ask");
-
+const loading = document.createElement("div");
+loading.className = `my-6`;
+loading.textContent = "thinking....";
 console.log(input);
 
 input.addEventListener("keyup", handelEnter);
@@ -20,11 +22,15 @@ Hi how are you?
   msg.textContent = text;
   chatContainer?.appendChild(msg);
   input.value = "";
+  chatContainer?.appendChild(loading);
+
   //call server
   const assistantMsg = await callServer(text);
   const assistantMsgEle = document.createElement("div");
   assistantMsgEle.className = `max-w-fit`;
   assistantMsgEle.textContent = assistantMsg;
+  loading.remove();
+
   chatContainer?.appendChild(assistantMsgEle);
 }
 async function callServer(message) {

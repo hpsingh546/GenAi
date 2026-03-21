@@ -41,7 +41,7 @@ export async function generate(UserMessage) {
   while (true) {
     const response = await groq.chat.completions.create({
       //Creates a model response for the given chat conversation.z
-      model: "openai/gpt-oss-120b", //some models have capability for browser search as welll like open ai
+      model: "llama-3.3-70b-versatile", //some models have capability for browser search as welll like open ai
       temperature: 0,
 
       messages: messages,
