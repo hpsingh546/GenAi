@@ -26,13 +26,18 @@ Hi how are you?
   chatContainer?.appendChild(loading);
 
   //call server
-  const assistantMsg = await callServer(text);
-  const assistantMsgEle = document.createElement("div");
-  assistantMsgEle.className = `max-w-fit`;
-  assistantMsgEle.textContent = assistantMsg;
-  loading.remove();
+  try {
+    const assistantMsg = await callServer(text);
+    const assistantMsgEle = document.createElement("div");
+    assistantMsgEle.className = `max-w-fit`;
+    assistantMsgEle.textContent = assistantMsg;
+    loading.remove();
 
-  chatContainer?.appendChild(assistantMsgEle);
+    chatContainer?.appendChild(assistantMsgEle);
+  } catch (error) {
+    assistantMsgEle.textContent = assistantMsg;
+    loading.remove();
+  }
 }
 async function callServer(message) {
   console.log(message);

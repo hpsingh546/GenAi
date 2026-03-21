@@ -40,7 +40,12 @@ export async function generate(UserMessage, threadId) {
     role: "user",
     content: UserMessage,
   });
+  const Max_Retries = 10;
+  let count = 0;
   while (true) {
+    if (count > Max_Retries)
+      return "i am not able to find sollution pls try again";
+    count += 1;
     const response = await groq.chat.completions.create({
       //Creates a model response for the given chat conversation.z
       model: "llama-3.3-70b-versatile", //some models have capability for browser search as welll like open ai
