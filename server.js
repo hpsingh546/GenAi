@@ -6,15 +6,16 @@ import realine from "node:readline/promises";
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const tvly = tavily({ apiKey: process.env.TVLY_API_KEY });
 let toolCallFreq = 0;
-const messages = [
-  {
-    content: `You are a smart personal assistant who ans the question. 
+
+async function main() {
+  const messages = [
+    {
+      content: `You are a smart personal assistant who ans the question. 
       When you need information you don't have, use the 'Websearch({query})'//search the latest information and real time data on internet,
      `,
-    role: "system",
-  },
-];
-async function main() {
+      role: "system",
+    },
+  ];
   const rl = realine.createInterface({
     input: process.stdin,
     output: process.stdout,
