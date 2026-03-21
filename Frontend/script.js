@@ -7,7 +7,8 @@ console.log(input);
 
 input.addEventListener("keyup", handelEnter);
 askBtn.addEventListener("click", handleAsk);
-
+const threadId =
+  Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
 async function generate(text) {
   /**
    * 1. append message to ui
@@ -40,7 +41,7 @@ async function callServer(message) {
     headers: {
       "content-type": "application/json",
     },
-    body: JSON.stringify({ message: message }),
+    body: JSON.stringify({ message: message, threadId: threadId }),
   });
   if (!response.ok) throw new Error("error generating response");
   const result = await response.json();

@@ -1,13 +1,14 @@
 import Groq from "groq-sdk";
 import "dotenv/config";
 import { tavily } from "@tavily/core";
-
+import NodeCache from "node-cache";
+const cache = new NodeCache({ stdTTL: 60 * 60 * 12 }); //after how much time data persiste after it clear data only those entry who have 12 hour will get delete here we store data in key value pair
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const tvly = tavily({ apiKey: process.env.TVLY_API_KEY });
 let toolCallFreq = 0;
 
-export async function generate(UserMessage) {
-  const messages = [
+export async function generate(UserMessage, threadId) {
+  const basemessages = [
     {
       role: "system",
       content: `You are a smart personal assistant.
@@ -34,6 +35,7 @@ export async function generate(UserMessage) {
                     current date and time: ${new Date().toUTCString()}`,
     },
   ];
+  const messages = cache.get(threadId) ?? basemessages;
   messages.push({
     role: "user",
     content: UserMessage,
@@ -74,6 +76,8 @@ export async function generate(UserMessage) {
     if (!toolCalls) //means llm not make toke tools it get ans
     {
       console.log(`Assistatant`, response.choices[0].message.content);
+      cache.set(threadId, messages); //Replacement behavior: Yes, if you use set on an existing key, it will replace the complete content previously associated with that key
+      console.log(cache);
       return response.choices[0].message.content;
     }
     toolCallFreq += 1;

@@ -10,9 +10,13 @@ app.get("/", (req, res) => {
   res.send("Welcome to chatdpt");
 });
 app.post("/chat", async (req, res) => {
-  const { message } = req.body;
+  const { message, threadId } = req.body;
+  // todo validate above field
+  if (!message || !threadId) {
+    res.status(400).json({ message: "All field are required" });
+  }
   console.log(message);
-  const result = await generate(message);
+  const result = await generate(message, threadId);
   res.send({ message: result });
 });
 app.listen(3001, () => {
